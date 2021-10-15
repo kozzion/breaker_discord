@@ -1,8 +1,8 @@
 
 
 import numpy as np
-import breaker_discord.extension.common.opus
-from breaker_discord.extension.common.opus import encoder, decoder
+import opus
+from opus import encoder, decoder
 class ToolsOpus:
 
     @staticmethod

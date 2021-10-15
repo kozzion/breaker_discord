@@ -2,7 +2,7 @@
 
 import threading
 
-from breaker_discord.extension.common.rtp import *
+from .rtp import *
 from collections import deque
 
 from discord.opus import Decoder
