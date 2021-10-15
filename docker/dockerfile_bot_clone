@@ -22,6 +22,8 @@ WORKDIR /breaker/breaker_aws
 RUN git pull
 RUN pip3 install -e .
 
+RUN apt-get install ffmpeg -y
+RUN ls
 WORKDIR /breaker/breaker_discord
 RUN git pull
 RUN pip3 install -e .
