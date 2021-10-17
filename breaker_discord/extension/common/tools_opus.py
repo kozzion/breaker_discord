@@ -3,6 +3,7 @@
 import numpy as np
 import opus
 from opus import encoder, decoder
+
 class ToolsOpus:
 
     @staticmethod

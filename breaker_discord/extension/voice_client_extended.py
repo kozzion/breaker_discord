@@ -1,8 +1,8 @@
 import sys
-import discord
 import threading
 
-from .gateway import hook
+import discord
+
 from breaker_discord.extension.reader import OpusEventAudioReader
 from breaker_discord.extension.reader import ConsumerAudio
 
@@ -15,6 +15,7 @@ class VoiceClientExtented(discord.VoiceClient):
         self._ssrc_to_id = {}
         self._id_to_ssrc = {}
         self.websocket = None
+
 
     async def connect_websocket(self):
         # interception messages
@@ -36,8 +37,9 @@ class VoiceClientExtented(discord.VoiceClient):
             pass #await _do_hacks(self)
 
         elif op == discord.gateway.DiscordVoiceWebSocket.SPEAKING:
-            user_id = data['user_id']
-            self._add_ssrc(user_id , data['ssrc'])
+            user_id = str(data['user_id'])
+            ssrc = str(data['ssrc'])
+            self._add_ssrc(user_id, ssrc)
 
             # if self.guild:
             #     user = self.guild.get_member(user_id)
@@ -46,9 +48,12 @@ class VoiceClientExtented(discord.VoiceClient):
             # self._state.dispatch('speaking_update', user, data['speaking'])
 
         elif op == discord.gateway.DiscordVoiceWebSocket.CLIENT_CONNECT:
-            self._add_ssrc(int(data['user_id']), data['audio_ssrc'])
+            user_id = str(data['user_id'])
+            ssrc = str(data['ssrc'])
+            self._add_ssrc(user_id, ssrc)
         elif op == discord.gateway.DiscordVoiceWebSocket.SPEAKING:
-            self._remove_ssrc(user_id=data['user_id'])
+            user_id = str(data['user_id'])
+            self._remove_ssrc(user_id=user_id)
         else:
             print(message)
         return await self.received_message_org(message)
@@ -56,13 +61,13 @@ class VoiceClientExtented(discord.VoiceClient):
     async def on_voice_state_update(self, data):
         await super().on_voice_state_update(data)
 
-        channel_id = data['channel_id']
-        guild_id = int(data['guild_id'])
-        user_id = int(data['user_id'])
+        channel_id = str(data['channel_id'])
+        guild_id = str(data['guild_id'])
+        user_id = str(data['user_id'])
 
-        if channel_id and int(channel_id) != self.channel.id and self._reader:
+        if channel_id and channel_id != str(self.channel.id) and self._reader:
             # someone moved channels
-            if self._connection.user.id == user_id:
+            if str(self._connection.user.id) == user_id:
                 # we moved channels
                 # print("Resetting all decoders")
                 self._reader._reset_decoders()
@@ -74,7 +79,7 @@ class VoiceClientExtented(discord.VoiceClient):
             else:
                 # someone else moved channels
                 # print(f"ws: Attempting to reset decoder for {user_id}")
-                ssrc, _ = self._get_ssrc_mapping(user_id=data['user_id'])
+                ssrc, _ = self._get_ssrc_mapping(user_id=user_id)
                 self._reader._reset_decoders(ssrc)
 
     # async def on_voice_server_update(self, data):
@@ -89,29 +94,37 @@ class VoiceClientExtented(discord.VoiceClient):
     # TODO: copy over new functions
     # add/remove/get ssrc
 
-    def _add_ssrc(self, user_id:str, ssrc:int):
+    def _add_ssrc(self, user_id:str, ssrc:str):
+        if not isinstance(user_id, str):
+            raise Exception()
+        if not isinstance(ssrc, str):
+            raise Exception()
         self._ssrc_to_id[ssrc] = user_id
         self._id_to_ssrc[user_id] = ssrc
 
     def _remove_ssrc(self, *, user_id:str):
+        if not isinstance(user_id, str):
+            raise Exception()
         ssrc = self._id_to_ssrc.pop(user_id, None)
         if ssrc:
             self._ssrc_to_id.pop(ssrc, None)
 
-    def _get_ssrc_mapping(self, *, ssrc):
-        uid = self._ssrc_to_id.get(ssrc)
-        return ssrc, uid
+    def _get_ssrc_mapping(self, *, ssrc:str): #TODO this is not used correctly 
+        if not isinstance(ssrc, str):
+            raise Exception()
+        user_id = self._ssrc_to_id.get(ssrc)
+        return ssrc, user_id
 
     def register_consumer(self, consumer:ConsumerAudio):
    
         if not self.is_connected():
-            raise ClientException('Not connected to voice.')
+            raise RuntimeError('Not connected to voice.')
 
         # if not isinstance(sink, AudioSink):
         #     raise TypeError('sink must be an AudioSink not {0.__class__.__name__}'.format(sink))
 
         if self.is_listening():
-            raise ClientException('Already receiving audio.')
+            raise RuntimeError('Already receiving audio.')
 
         self._reader = OpusEventAudioReader(consumer, self)
         self._reader.start()

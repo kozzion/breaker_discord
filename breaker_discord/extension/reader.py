@@ -127,10 +127,7 @@ class ConsumerLogger(ConsumerAudio):
                     #TODO use the timestamps and such to fix the signal
                     array_int16_pcm, sample_rate = ToolsOpus.opus_to_array_int16_pcm(list_bytearray)
 
-                    path_file_wav = Path('.').joinpath('voice', id_user + '_' + str(packet.timestamp) + '.wav')
-                    path_file_wav.parent.mkdir(exist_ok=True)
-           
-
+        
                     import io #TODO move to breaker_audio when that is migrated to a newer python
                     bytesio = io.BytesIO()
                     sf.write(bytesio, array_int16_pcm, sample_rate, format='WAV', subtype='PCM_16')
@@ -159,6 +156,46 @@ class ConsumerLogger(ConsumerAudio):
         # discord_recv.common.rtp.ReceiverReportPacket'
         # if isinstance(packet, ReceiverReportPacket) 
         # print(type(member))
+        
+
+    def _write_to_sink(self, data):
+        print('here')
+        pass
+
+
+from breaker_discord.extension.processor.processor_opus import ProcessorOpus
+
+class ConsumerSplitter(ConsumerAudio):
+    def __init__(self, client_discord):
+        self.dict_decoder = {}
+        self.client_discord = client_discord
+        self.client_voice = None
+        self.list_processor_opus = []
+        
+    def register_processor_opus(self, processor_opus:ProcessorOpus):
+        self.list_processor_opus.append(processor_opus)
+
+    def on_voice_packet(self, member, packet):
+        if self.client_voice == None:
+            return
+
+        #str(self.client_voice.channel.id)
+        id_conversation = str(self.client_discord.user.id)
+        id_source = str(packet.ssrc)
+        timestamp = packet.timestamp,
+        sequence = packet.sequence
+        bytearray_opus:bytearray = packet.decrypted_data
+
+        for processor_opus in self.list_processor_opus:
+            processor_opus.process(id_conversation, id_source, timestamp , sequence, bytearray_opus)
+        
+        for processor_opus in self.list_processor_opus:
+            if processor_opus.is_complete():
+                self.list_processor_opus.remove(processor_opus)
+
+    def on_voice_rtcp_packet(self, packet):
+        pass
+
         
 
     def _write_to_sink(self, data):

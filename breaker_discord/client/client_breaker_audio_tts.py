@@ -28,22 +28,7 @@ class ClientBreakerAudioTts:
         dict_request['bytearraysource_voice'] = bytearraysource_voice.to_dict()
         dict_request['text'] = text
         dict_request['bytearraysource_output'] = bytearraysource_output.to_dict()
-        # print(dict_request['path_file_voice_toclone'])
-
-
-
-        # bytearray_request = json.dumps(dict_request)
-        # id_request =  hashlib.md5(bytearray_request.encode('utf-8')).hexdigest()
-
-        # path_file_request = self.path_dir_request.joinpath(id_request + '.json').absolute()
-        # path_file_response = self.path_dir_response.joinpath(id_request + '.wav').absolute()
-
-        # print(id_request)
-        # print(path_file_voice)
-        # print(path_file_voice.absolute())
-        # print(path_file_request)
-        # print(path_file_response)
-        # sys.stdout.flush()
+ 
         if bytearraysource_output.exists():
             print('response found')
             sys.stdout.flush()
