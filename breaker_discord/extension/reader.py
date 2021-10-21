@@ -43,10 +43,10 @@ import soundfile as sf
 from discord.errors import DiscordException
 
 from breaker_discord.extension.common import rtp
-from breaker_discord.extension.common.utils import Defaultdict
 from breaker_discord.extension.common.rtp import RTCPPacket, SilencePacket
 from breaker_discord.extension.common.opus import Decoder, BufferedDecoder
 
+from breaker_discord.extension.processor.processor_opus import ProcessorOpus
 
 log = logging.getLogger(__name__)
 
@@ -92,23 +92,30 @@ class ConsumerLogger(ConsumerAudio):
         self.dict_decoder = {}
         self.client_discord = client_discord
         self.client_voice = None
-        self.dict_id_user_to_bytearraysource = {}
+        self.dict_id_user_to_bytessource_sound = {}
+        self.dict_id_user_to_bytessource_encoding = {}
+        self.dict_id_user_to_bytessource_encoding_dir = {}
+        self.dict_id_user_to_client_encoding = {}
         self.dict_id_user_to_count_packet_desired = {}
         self.dict_id_user_to_count_packet_reported = {}
         self.dict_id_user_to_list_packet = {}
         self.dict_id_user_to_channel = {}
         self.dict_id_user_to_display_name = {}
+        self.dict_id_user_to_bot= {}
         
-
+    def register_processor_opus(self, processor_opus:ProcessorOpus):
+        pass
 
     def on_voice_packet(self, member, packet):
         if self.client_voice == None:
             return
 
-        if packet.ssrc in self.client_voice._ssrc_to_id: 
-            id_user = self.client_voice._ssrc_to_id[packet.ssrc]
+        id_source = str(packet.ssrc)
+        sys.stdout.flush()
+        if id_source in self.client_voice._ssrc_to_id: 
+            id_user = self.client_voice._ssrc_to_id[id_source]
             if id_user in self.dict_id_user_to_list_packet:
-  
+           
 
 
                 list_packet = self.dict_id_user_to_list_packet[id_user]
@@ -119,30 +126,57 @@ class ConsumerLogger(ConsumerAudio):
                 count_packet_since_report = len(list_packet) - self.dict_id_user_to_count_packet_reported[id_user]
                 channel = self.dict_id_user_to_channel[id_user]
                 display_name = self.dict_id_user_to_display_name[id_user]
-
-
-
                 if len(list_packet) == count_packet_desired:
+    
                     list_bytearray = [packet[2] for packet in list_packet]
                     #TODO use the timestamps and such to fix the signal
                     array_int16_pcm, sample_rate = ToolsOpus.opus_to_array_int16_pcm(list_bytearray)
 
-        
+                    bytessource_sound = self.dict_id_user_to_bytessource_sound[id_user]
+                    bytessource_encoding = self.dict_id_user_to_bytessource_encoding[id_user]
+                    bytessource_encoding_dir = self.dict_id_user_to_bytessource_encoding_dir[id_user]
+
                     import io #TODO move to breaker_audio when that is migrated to a newer python
                     bytesio = io.BytesIO()
                     sf.write(bytesio, array_int16_pcm, sample_rate, format='WAV', subtype='PCM_16')
                     bytesio.seek(0)
-                    self.dict_id_user_to_bytearraysource[id_user].save(bytesio.read())
- 
-                    
-                    self.client_discord.loop.create_task(channel.send("Cloning " + display_name + " complete"))
+                    bytessource_sound.write(bytesio.read())
+                    client = self.dict_id_user_to_client_encoding[id_user]
 
-                    del self.dict_id_user_to_bytearraysource[id_user]
+                    if bytessource_encoding_dir == '':
+                        print('mode encode')
+           
+                        self.client_discord.loop.create_task(channel.send("Recording " + display_name + " complete creating encoding"))
+                        response = client.encode(
+                            bytessource_sound,
+                            bytessource_encoding)
+                        self.client_discord.loop.create_task(channel.send("Encoding of " + display_name + " was succesfull succes"))
+                        print(response)
+                        sys.stdout.flush()
+                        
+                    elif bytessource_encoding == '':
+                        print('auth mode')
+                        response = client.authenticate(
+                            bytessource_sound,
+                            bytessource_encoding_dir)
+                        bot = self.dict_id_user_to_bot[id_user]
+                        from breaker_discord.command.command_ai import CommandVoiceauth
+                        self.client_discord.loop.create_task(CommandVoiceauth.plot_report(bot, channel, response))
+                        print(response)
+                        sys.stdout.flush()
+                    else:
+                        print('unknown mode')
+                        sys.stdout.flush()
+                    del self.dict_id_user_to_bytessource_sound[id_user]
+                    del self.dict_id_user_to_bytessource_encoding[id_user]
+                    del self.dict_id_user_to_bytessource_encoding_dir[id_user]
+                    del self.dict_id_user_to_client_encoding[id_user]
                     del self.dict_id_user_to_count_packet_desired[id_user]
                     del self.dict_id_user_to_count_packet_reported[id_user]
                     del self.dict_id_user_to_channel[id_user]
                     del self.dict_id_user_to_display_name[id_user]
                     del self.dict_id_user_to_list_packet[id_user]
+                    del self.dict_id_user_to_bot[id_user]
 
                 elif count_packet_since_report == 100:
                     self.client_discord.loop.create_task(channel.send("Cloning " + display_name + " " + str(len(list_packet)) + ' out of ' + str(count_packet_desired)))
@@ -163,7 +197,6 @@ class ConsumerLogger(ConsumerAudio):
         pass
 
 
-from breaker_discord.extension.processor.processor_opus import ProcessorOpus
 
 class ConsumerSplitter(ConsumerAudio):
     def __init__(self, client_discord):
@@ -487,7 +520,7 @@ class OpusEventAudioReader(_ReaderBase):
         event(*args)
 
     def _get_user(self, packet):
-        _, user_id = self.client._get_ssrc_mapping(ssrc=packet.ssrc)
+        _, user_id = self.client._get_ssrc_mapping(ssrc=str(packet.ssrc))
         # may need to change this for calls or something
         return self.client.guild.get_member(user_id)
 
@@ -552,8 +585,8 @@ class OpusEventAudioReader(_ReaderBase):
                 traceback.print_exc()
 
             else:
-                if packet.ssrc not in self.client._ssrc_to_id:
-                    log.debug("Received packet for unknown ssrc %s", packet.ssrc)
+                if str(packet.ssrc) not in self.client._ssrc_to_id:
+                    log.debug("Received packet for unknown ssrc %s", str(packet.ssrc))
 
                 self.dispatch('voice_packet', self._get_user(packet), packet)
 

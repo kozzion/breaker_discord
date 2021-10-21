@@ -1,13 +1,13 @@
 import sys
 
-from breaker_core.datasource.bytearraysource_generator import BytearraysourceGenerator
+from breaker_core.datasource.bytessource_generator import BytessourceGenerator
 from breaker_discord.extension.processor.processor_opus import ProcessorOpus
 
 class ProcessorOpusSaveAudio(ProcessorOpus):
 
-    def __init__(self, voice_client, bytearraysource_save:BytearraysourceGenerator) -> None:
+    def __init__(self, voice_client, bytessource_save:BytessourceGenerator) -> None:
         self.voice_client = voice_client
-        self.bytearraysource_save = bytearraysource_save
+        self.bytessource_save = bytessource_save
         self.dict_temp_storage = {}
         
 
@@ -19,7 +19,7 @@ class ProcessorOpusSaveAudio(ProcessorOpus):
         sys.stdout.flush()
         # if id_source in self.voice_client.
         # id_user = 
-        # self.bytearraysource_save.generate([id_conversation])
+        # self.bytessource_save.generate([id_conversation])
 
     def is_complete(self) -> bool:
         return False

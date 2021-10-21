@@ -1,6 +1,5 @@
 *.cfg
 *.pyc
 breaker_discord.egg-info/
-
-test/state.json
-docker/notes.txt
+*notes.txt
+*.png

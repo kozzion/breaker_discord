@@ -6,42 +6,27 @@ import sys
 import hashlib
 
 from breaker_core.datasource.jsonqueue import Jsonqueue
-from breaker_core.datasource.bytearraysource import Bytearraysource
+from breaker_core.datasource.bytessource import Bytessource
 
-class ClientBreakerAudioTts:
+from breaker_discord.client.client import Client
+
+class ClientBreakerAudioTts(Client):
 
     def __init__(
         self,
         jsonqueue_request:Jsonqueue) -> None:
-        
-        self.jsonqueue_request = jsonqueue_request
+        super.__init__(jsonqueue_request)
 
     def synthesize(
         self,
         language_code_639_3:str,
-        bytearraysource_voice:Bytearraysource,
+        bytessource_voice:Bytessource,
         text:str,
-        bytearraysource_output:Bytearraysource):
+        bytessource_output:Bytessource):
 
         dict_request = {}
         dict_request['language_code_639_3'] = language_code_639_3
-        dict_request['bytearraysource_voice'] = bytearraysource_voice.to_dict()
+        dict_request['bytessource_voice'] = bytessource_voice.to_dict()
         dict_request['text'] = text
-        dict_request['bytearraysource_output'] = bytearraysource_output.to_dict()
- 
-        if bytearraysource_output.exists():
-            print('response found')
-            sys.stdout.flush()
-            return
-        else:
-            print('writing request')
-            sys.stdout.flush()
-            self.jsonqueue_request.enqueue(dict_request)
-
-            while(True):
-                if bytearraysource_output.exists():
-                    time.sleep(0.001)
-                    return
-                else:
-                    time.sleep(0.1)
-
+        dict_request['bytessource_output'] = bytessource_output.to_dict()
+        self.await_response(dict_request, bytessource_output)
