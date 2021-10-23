@@ -8,7 +8,7 @@ from breaker_core.datasource.jsonqueue import Jsonqueue
 from breaker_core.datasource.bytessource import Bytessource
 
 
-from breaker_discord.client.client_breaker_audio_tts import ClientBreakerAudioTts
+from breaker_discord.client.client_voice_synthesizer import ClientVoiceSynthesizer
 from breaker_discord.client.client_voice_authenticator import ClientVoiceAuthenticator
 
 from breaker_discord.agent.agent_logger import AgentLoggerEvent
@@ -37,18 +37,23 @@ from breaker_discord.command.command_ai import CommandVoiceauth
 # from breaker_discord.command.command_play import CommandPlayalias
 from breaker_discord.bot_clone import BotClone
 
-path_file_config_breaker = os.environ['PATH_FILE_CONFIG_BREAKER_DEV']
+path_file_config_breaker = os.environ['PATH_FILE_CONFIG_BREAKER']
+path_file_ffmpef =  os.environ['PATH_FILE_FFMPEG']
 with open(path_file_config_breaker, 'r') as file:
     dict_config = json.load(file)
 
 token = dict_config['token']
-path_file_ffmpef = Path(dict_config['path_file_ffmpef'])
 
-queue_request_voice_tts = Jsonqueue.from_dict(dict_config['queue_request_voice_tts'])
-bytessource_response_voice_tts = Bytessource.from_dict(dict_config['bytessource_response_voice_tts'])
+
+queue_request_voice_synthesizer = Jsonqueue.from_dict(dict_config['queue_request_voice_synthesizer'])
+bytessource_response_voice_synthesizer = Bytessource.from_dict(dict_config['bytessource_response_voice_synthesizer'])
+bytessource_putput_voice_synthesizer = Bytessource.from_dict(dict_config['bytessource_output_voice_synthesizer'])
+
 
 queue_request_voice_authenticator = Jsonqueue.from_dict(dict_config['queue_request_voice_authenticator'])
 bytessource_response_voice_authenticator = Bytessource.from_dict(dict_config['bytessource_response_voice_authenticator'])
+
+
 
 bytessource_bot = Bytessource.from_dict(dict_config['bytessource_bot'])
 bytessource_sound = bytessource_bot.join(['sound'])
@@ -59,6 +64,11 @@ bytessource_tts_output = bytessource_bot.join(['sound_tts'])
 
 bytessource_log_event = bytessource_bot.join(['log','event'])
 # client_tts = ClientBreakerAudioTts(queue_request_voice_tts)
+client_voice_synthesizer = ClientVoiceSynthesizer(
+    queue_request_voice_synthesizer,
+    bytessource_response_voice_synthesizer,
+    bytessource_putput_voice_synthesizer)
+
 
 client_auth = ClientVoiceAuthenticator(
     queue_request_voice_authenticator,
@@ -84,7 +94,7 @@ bot.add_command(CommandPlaylist(bytessource_sound))
 bot.add_command(CommandPost(bytessource_file))
 bot.add_command(CommandPostlist(bytessource_file))
 
-# bot.add_command(CommandTts(client_tts, bytessource_voice, bytessource_output_tts))
+bot.add_command(CommandTts(client_voice_synthesizer, bytessource_voice_sound, bytessource_putput_voice_synthesizer))
 bot.add_command(CommandRecordme(client_auth, bytessource_voice_sound, bytessource_voice_encoding))
 bot.add_command(CommandPlayme(bytessource_voice_sound))
 bot.add_command(CommandPlayuser(bytessource_voice_sound))

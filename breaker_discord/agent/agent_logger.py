@@ -55,8 +55,6 @@ class AgentLoggerEvent(Agent):
             bytessource_logger_last = self.bytessource_logger_events.join([str_timestamp])
             bytessource_logger_last.write_json({'list_event':[]})
             # create new logger object
-        print(bytessource_logger_last.path)
-        
         return bytessource_logger_last
 
     def querry_log(self, *, timestamp_start=None, timestamp_end=None, id_channel=None, list_id_user=None) -> 'list':

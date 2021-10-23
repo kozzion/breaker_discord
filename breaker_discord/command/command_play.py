@@ -14,11 +14,20 @@ class CommandPlay(Command):
         super().__init__('play', help_message)
 
     async def execute(self, list_argument, message) -> None:
+        if len(list_argument) == 0:       
+            await message.channel.send("Please provide a \{filename\} argument.")   
+            return
+
         bytessource_sound = self.bytessource_sounds.join([list_argument[0]])
         if not bytessource_sound.exists():
-            list_list_key = self.bytessource_sounds.list_shallow(list_argument[0])
-            if len(list_list_key) == 1:
-                bytessource_sound = self.bytessource_sounds.join(list_list_key[0])
+            list_list_key = self.bytessource_sounds.list_shallow()
+            list_can = []
+            for list_key in list_list_key:
+                if list_key[0].startswith(list_argument[0]) == 1:
+                    list_can.append(list_key)
+
+            if len(list_can) == 1:
+                bytessource_sound = self.bytessource_sounds.join(list_can[0])
             else:
                 await message.channel.send("no such sound: " + str(list_argument[0]))
                 return

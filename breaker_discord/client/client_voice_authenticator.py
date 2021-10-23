@@ -22,11 +22,7 @@ class ClientVoiceAuthenticator(Client):
         bytessource_sound:Bytessource,
         bytessource_encoding:Bytessource, 
         *,
-        force_reprocess=True):
-        print(bytessource_sound.path)
-        print(bytessource_encoding.path)
-        print(bytessource_sound.exists())
-        print(bytessource_encoding.exists())
+        force_reprocess=False):
 
         dict_request = {}
         dict_request['type_request'] = 'encode' 

@@ -6,13 +6,13 @@ from breaker_core.tools_general import ToolsGeneral
 from breaker_core.datasource.bytessource import Bytessource
 from breaker_core.datasource.bytessource_bytearray import BytessourceBytearray
 from breaker_discord.command.command import Command
-from breaker_discord.client.client_breaker_audio_tts import ClientBreakerAudioTts
+from breaker_discord.client.client_voice_synthesizer import ClientVoiceSynthesizer
 from breaker_discord.client.client_voice_authenticator import ClientVoiceAuthenticator
 
 class CommandTts(Command):
     
     def __init__(self, 
-        client_tts:ClientBreakerAudioTts,
+        client_tts:ClientVoiceSynthesizer,
         bytessource_voice:Bytessource,
         bytessource_output:Bytessource) -> None:
         self.client_tts = client_tts
@@ -27,36 +27,29 @@ class CommandTts(Command):
           
 
     async def execute(self, list_argument, message) -> None:
-        server = message.guild
-        voice_client = server.voice_client
-
         language_code_639_3 = list_argument[0]
         id_user = list_argument[1]
         text = list_argument[2]
 
-        id_user = list_argument[0]
         if not ToolsGeneral.str_is_int(id_user):
-            id_user = self.bot.state['dict_alias'][id_user]
-        bytessource_voice = ToolsCommandAi.get_bytessource_voice(self.bytessource_voice, id_user)
+            if id_user in  self.bot.state['dict_alias']:
+                id_user = self.bot.state['dict_alias'][id_user]
+            else:
+                await message.channel.send("Unknown id_user or alias: " + id_user)
+                return
 
-
-
-        dict_request = {
-            'language_code_639_3':language_code_639_3,
-            'id_user':id_user,
-            'text':text
-        }
-        hash_request = hashlib.md5(json.dumps(dict_request).encode('utf-8')).hexdigest()
-        bytessource_output = self.bytessource_output.generate([hash_request])
-
-        self.client_tts.synthesize(language_code_639_3, bytessource_voice, text , bytessource_output)
         
+        bytessource_voice = ToolsCommandAi.get_bytessource_voice(self.bytessource_voice, id_user)
+        if bytessource_voice is None:
+                await message.channel.send("No voice segment recorded recorded id_user or alias: " + id_user)
+                return
+        response, bytessource_output = self.client_tts.synthesize(language_code_639_3, bytessource_voice, text)
 
         if not bytessource_output.exists():
             await message.channel.send("Output missing") #TODO this is nonsense
             return
         
-        await self.bot.play_bytessource(bytessource_voice)
+        await self.bot.play_bytessource(bytessource_output)
             
 class CommandRecordme(Command):
 

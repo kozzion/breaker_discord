@@ -13,18 +13,27 @@ class CommandPost(Command):
         super().__init__('post', help_message)
 
     async def execute(self, list_argument, message) -> None:
+        if len(list_argument) == 0:       
+            await message.channel.send("Please provide a \{filename\} argument.")   
+            return
         bytessource_file = self.bytessource_files.join([list_argument[0]]) 
         if bytessource_file.exists():
             filename = list_argument[0]
         else:
-            list_list_key = self.bytessource_files.list_shallow(list_argument[0])
-            if len(list_list_key) == 1:
-                bytessource_file = self.bytessource_files.join(list_list_key[0])
-                filename = list_list_key[0][0]
+            list_list_key = self.bytessource_files.list_shallow()
+            list_can = []
+            for list_key in list_list_key:
+                if list_key[0].startswith(list_argument[0]) == 1:
+                    list_can.append(list_key)
+
+            if len(list_can) == 1:
+                bytessource_file = self.bytessource_files.join(list_can[0])
+                filename = list_can[0][-1]
             else:
                 await message.channel.send("no such file: " + str(list_argument[0]))
                 return
-                
+
+     
         voice_client = message.guild.voice_client
         if not voice_client.is_connected():            
             await message.channel.send("The bot is not connected to a voice channel.")

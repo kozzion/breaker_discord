@@ -1,16 +1,12 @@
-from pathlib import Path
-import random
 import os
 import json
-import sys
-import asyncio
-
-from breaker_discord.client.client_voice_authenticator import ClientVoiceAuthenticator
 
 from breaker_core.datasource.jsonqueue import Jsonqueue
 from breaker_core.datasource.bytessource import Bytessource
 
-path_file_config_breaker = os.environ['PATH_FILE_CONFIG_BREAKER_DEV']
+from breaker_discord.client.client_voice_authenticator import ClientVoiceAuthenticator
+
+path_file_config_breaker = os.environ['PATH_FILE_CONFIG_BREAKER']
 with open(path_file_config_breaker, 'r') as file:
     dict_config = json.load(file)
 
