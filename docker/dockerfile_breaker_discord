@@ -7,38 +7,35 @@ RUN apt-get install gcc -y
 RUN apt-get install wget -y
 RUN apt-get install libsndfile1 -y 
 RUN apt-get install libportaudio2 -y
+RUN apt-get install ffmpeg -y
 
 RUN pip install --upgrade pip
 
-WORKDIR /breaker/
+WORKDIR /code/
 
 RUN git clone https://github.com/svartalf/python-opus
 RUN git clone https://github.com/kozzion/breaker_core
 RUN git clone https://github.com/kozzion/breaker_aws
 RUN git clone https://github.com/kozzion/breaker_discord
 
-WORKDIR /breaker/python-opus
+WORKDIR /code/python-opus
 RUN pip3 install -e .
 
-WORKDIR /breaker/breaker_core
+WORKDIR /code/breaker_core
 RUN git pull
 RUN pip3 install -e .
 
-WORKDIR /breaker/breaker_aws
+WORKDIR /code/breaker_aws
 RUN git pull
 RUN pip3 install -e .
 
-RUN apt-get install ffmpeg -y
 RUN ls
-WORKDIR /breaker/breaker_discord
+WORKDIR /code/breaker_discord
 RUN git pull
 RUN pip3 install -e .
-
-
-#
 
 # copy config
-WORKDIR /breaker/breaker_discord/test
-COPY config.cfg config.cfg
-# CMD [ "python3", "bot_clone.py"]
-CMD [ "/bin/bash"]
+WORKDIR /code/breaker_discord/script
+# TODO mount this instead
+COPY config.cfg config.cfg 
+CMD [ "python3", "breaker_discord.py"]

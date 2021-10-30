@@ -1,4 +1,8 @@
 
+# login to server
+
+
+#
 command =  'docker build'
 command += ' -t image_service_synthesize'
 command += ' -f dockerfile_service_synthesize'

@@ -163,6 +163,7 @@ class BotClone:
                 await self.dict_command[keyword].execute(list_argument, message)
             except Exception as e:
                 await message.channel.send("Exception while execution command: " + keyword)
+                await message.channel.send(str(e))
                 raise(e)
         else:
             await message.channel.send("Unknown command: " + keyword)
