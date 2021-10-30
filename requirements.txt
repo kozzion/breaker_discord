@@ -3,3 +3,4 @@ PyNaCl==1.4.0
 numpy==1.19.5
 python-binance==1.0.15
 matplotlib==3.4.3
+pysoundfile==0.10.3.post1
