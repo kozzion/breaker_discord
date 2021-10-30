@@ -24,10 +24,11 @@ os.system(command)
 
 #run new image
 command =  'docker run'
-command += ' -e POSTGRES_ENV_POSTGRES_PASSWORD="foo"'
+command += ' -e PATH_FILE_CONFIG_BREAKER="config.cfg"'
+command += ' -e PATH_FILE_CONFIG_BREAKER="config.cfg"'
 command += ' --name ' + name_container
 command += ' ' + name_image
-#os.system(command)
+os.system(command)
 
 
 # -e POSTGRES_ENV_POSTGRES_USER='bar' \
