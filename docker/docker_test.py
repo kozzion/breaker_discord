@@ -6,16 +6,18 @@ name_container = 'container_' + name
 
 # stop container
 
+
 # unname old image
+command =  'docker rm ' + name_container
+os.system(command)
 
 # build new image
 command =  'docker build'
 command += ' -t ' + name_image
 command += ' -f ' + name_dockerfile
 command += ' build' # TODO remove this
+os.system(command)
 
-print(command)
-# os.system(command)
 #run new image
 command =  'docker run'
 command += ' -e POSTGRES_ENV_POSTGRES_PASSWORD="foo"'
