@@ -5,14 +5,15 @@ name_image = 'image_' + name
 name_container = 'container_' + name
 
 # stop container
-
+command =  'docker stop ' + name_container
+os.system(command)
 
 # unname old container
 command =  'docker rm ' + name_container
 os.system(command)
 
 # unname old image
-command =  'docker rm ' + name_image
+command =  'docker rmi ' + name_image
 os.system(command)
 
 # build new image
