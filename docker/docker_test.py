@@ -23,9 +23,10 @@ command += ' build' # TODO remove this
 os.system(command)
 
 #run new image
+#TODO move these back to config
 command =  'docker run'
-command += ' -e PATH_FILE_CONFIG_BREAKER="config.cfg"'
-command += ' -e PATH_FILE_CONFIG_BREAKER="config.cfg"'
+command += ' -e AWS_ACCESS_KEY_ID="' + os.environ['AWS_ACCESS_KEY_ID'] + '"'
+command += ' -e AWS_SECRET_ACCESSS_KEY="' + os.environ['AWS_SECRET_ACCESSS_KEY'] + '"'
 command += ' --name ' + name_container
 command += ' ' + name_image
 os.system(command)
