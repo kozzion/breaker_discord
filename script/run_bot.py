@@ -39,7 +39,7 @@ from breaker_discord.command.command_binance import CommmandBinance
 from breaker_discord.bot_clone import BotClone
 
 if __name__ == '__main__':
-    path_file_config_breaker = Path(os.getenv('PATH_FILE_CONFIG_BREAKER', 'config.cfg'))
+    path_file_config_breaker = Path(os.getenv('PATH_FILE_CONFIG_BREAKER', '/config/config.cfg'))
     path_file_ffmpef =  Path(os.getenv('PATH_FILE_FFMPEG', '/usr/bin/ffmpeg'))
     with open(path_file_config_breaker, 'r') as file:
         dict_config = json.load(file)

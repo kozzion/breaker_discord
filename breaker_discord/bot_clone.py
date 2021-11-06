@@ -115,10 +115,7 @@ class BotClone:
     async def play_bytessource(self, bytessource_sound:Bytessource, volume_factor:float=None):
         if volume_factor is None:
             volume_factor = self.state['volume_factor']
-        path_file_temp = Path('temp.wav') #TODO make bytearray_source getable as tempfilepath
-        with path_file_temp.open('wb') as file:
-            file.write(bytessource_sound.read()) #TODO make bytearray_source getable as tempfilepath
-  
+        path_file_temp = bytessource_sound.read_tempfile('.wav')
         str_volume = "{:.2f}".format(volume_factor)
         self.client_voice.play(discord.FFmpegPCMAudio(
             executable=str(self.path_file_ffmpeg.absolute()), 

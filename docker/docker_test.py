@@ -1,4 +1,9 @@
 import os
+from pathlib import Path
+
+path_file_config = Path(os.getenv('PATH_FILE_CONFIG_BREAKER'))
+
+
 name = 'breaker_discord'
 name_dockerfile = 'dockerfile_' + name
 name_image = 'image_' + name
@@ -29,6 +34,7 @@ command =  'docker run'
 command += ' -e AWS_ACCESS_KEY_ID="' + os.environ['AWS_ACCESS_KEY_ID'] + '"'
 command += ' -e AWS_SECRET_ACCESSS_KEY="' + os.environ['AWS_SECRET_ACCESSS_KEY'] + '"'
 command += ' --name ' + name_container
+command += ' --mount type=bind, source=' + (path_file_config.absolute()) + ', target=/config/config.cfg, readonly' 
 command += ' ' + name_image
 os.system(command)
 

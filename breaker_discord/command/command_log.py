@@ -1,5 +1,6 @@
 from os import name
 from pathlib import Path
+import tempfile
 
 import matplotlib.pyplot as plt
 import discord
@@ -78,12 +79,8 @@ class CommandLogplotevent(Command):
             array_timestamp = (np.array(dict_id_user_to_list_timestamp[id_user])  - timestamp_last)/ 3600
             plt.plot(array_timestamp, dict_id_user_to_list_is_present[id_user], label=name_user)
 
-        
-        print('logplotevent!')
-        path_file_plot = 'plot.png' #TODO make bytearray_source getable as tempfilepath
-        plt.savefig(path_file_plot)
-        with open(path_file_plot, 'rb') as file:
-             #TODO make bytearray_source getable as tempfilepath
+        with tempfile.TemporaryFile(suffix=".png") as file:
+            plt.savefig(file, format="png")
             bytessource_post = BytessourceBytearray(file.read())
-        await self.bot.post_bytessource(bytessource_post, path_file_plot, message.channel)
+            await self.bot.post_bytessource(bytessource_post, 'plot.png', message.channel)
 
