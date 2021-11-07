@@ -29,6 +29,4 @@ RUN pip3 install -e /code/breaker_discord
 # copy config
 WORKDIR /code/breaker_discord/script
 
-# TODO mount this instead
-COPY config.cfg config.cfg 
 CMD [ "python3", "run_bot.py"]
