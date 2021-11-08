@@ -26,13 +26,15 @@ class BotClone:
             self, 
             token:str,
             path_file_ffmpeg:Path,
-            bytessource_bot:Bytessource) -> None:
+            bytessource_bot:Bytessource, 
+            default_guild:str=None,
+            default_channel:str=None) -> None:
         self.token = token
         self.path_file_ffmpeg = path_file_ffmpeg
         self.bytessource_bot = bytessource_bot
         self.load_state()
-
-        
+        self.default_guild = default_guild
+        self.default_channel = default_channel
 
         self.client_bot = discord.Client()
         self.client_voice = None 
@@ -72,7 +74,8 @@ class BotClone:
                 guild_count = guild_count + 1
             print("SampleDiscordBot is in " + str(guild_count) + " guilds.")
             sys.stdout.flush()
-            await self.join_channel_by_name('Kozzions secret castle','Voice')
+            if not self.default_guild is None:
+                await self.join_channel_by_name(self.default_guild, self.default_channel)
         
         @self.client_bot.event
         async def on_message(message):
@@ -102,7 +105,9 @@ class BotClone:
             if guild.name == name_guild:
                 for channel in guild.channels:
                     if channel.name == name_channel: 
+                        print('Joining channel: ' + name_guild + '::' + name_channel)
                         await self.join_channel(channel)   
+        print('could not find channel: ' + name_guild + '::' + name_channel)
                        
     async def join_channel(self, channel):
         self.client_voice = await channel.connect(cls=VoiceClientExtented)

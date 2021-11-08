@@ -45,19 +45,18 @@ if __name__ == '__main__':
         dict_config = json.load(file)
 
     token = dict_config['token']
+    default_guild = dict_config['default_guild']
+    default_channel = dict_config['default_channel']
+    
 
+    queue_request_voice_synthesizer = Jsonqueue.from_dict(dict_config, dict_config['queue_request_voice_synthesizer'])
+    bytessource_response_voice_synthesizer = Bytessource.from_dict(dict_config, dict_config['bytessource_response_voice_synthesizer'])
+    bytessource_putput_voice_synthesizer = Bytessource.from_dict(dict_config, dict_config['bytessource_output_voice_synthesizer'])
 
-    queue_request_voice_synthesizer = Jsonqueue.from_dict(dict_config['queue_request_voice_synthesizer'])
-    bytessource_response_voice_synthesizer = Bytessource.from_dict(dict_config['bytessource_response_voice_synthesizer'])
-    bytessource_putput_voice_synthesizer = Bytessource.from_dict(dict_config['bytessource_output_voice_synthesizer'])
+    queue_request_voice_authenticator = Jsonqueue.from_dict(dict_config, dict_config['queue_request_voice_authenticator'])
+    bytessource_response_voice_authenticator = Bytessource.from_dict(dict_config, dict_config['bytessource_response_voice_authenticator'])
 
-
-    queue_request_voice_authenticator = Jsonqueue.from_dict(dict_config['queue_request_voice_authenticator'])
-    bytessource_response_voice_authenticator = Bytessource.from_dict(dict_config['bytessource_response_voice_authenticator'])
-
-
-
-    bytessource_bot = Bytessource.from_dict(dict_config['bytessource_bot'])
+    bytessource_bot = Bytessource.from_dict(dict_config, dict_config['bytessource_bot'])
     bytessource_sound = bytessource_bot.join(['sound'])
     bytessource_file = bytessource_bot.join(['file'])
     bytessource_voice_sound = bytessource_bot.join(['voice_sound'])
@@ -85,7 +84,9 @@ if __name__ == '__main__':
     bot = BotClone(
         token, 
         path_file_ffmpef,
-        bytessource_bot)
+        bytessource_bot,
+        default_guild,
+        default_channel)
 
     bot.add_agent(AgentLoggerEvent(bytessource_log_event))
 
